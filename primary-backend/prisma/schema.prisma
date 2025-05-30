@@ -1,0 +1,78 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String   @id @default(cuid())
+  email       String   @unique
+  password    String?  // Optional for Google OAuth users
+  name        String?
+  googleId    String?  @unique
+  avatar      String?
+  provider    String   @default("local") // 'local' or 'google'
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Add session model for express-session with Prisma
+  sessions    Session[]
+  prompts     Prompt[] 
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  sid       String   @unique
+  data      String
+  expiresAt DateTime
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model Prompt {
+  id          String       @id @default(cuid())
+  prompt      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  // Relations
+  userId      String
+  user        User         @relation(fields: [userId], references: [id])
+  aiResponses AiResponse[] // Assuming AiResponse model exists
+  videos      Video[]
+}
+
+model AiResponse {
+  id String @id @default(cuid())
+  content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  //relations
+  promptId String
+  prompt   Prompt @relation(fields: [promptId], references: [id])
+}
+
+model Video {
+  id        String   @id @default(cuid())
+  url       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  promptId String
+  prompt   Prompt   @relation(fields: [promptId], references: [id])
+}
