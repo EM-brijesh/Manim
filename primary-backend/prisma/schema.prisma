@@ -70,7 +70,6 @@ model Video {
   id        String   @id @default(cuid())
   url       String
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 
   // Relations
   promptId String

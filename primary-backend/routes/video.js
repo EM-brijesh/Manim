@@ -1,8 +1,9 @@
 import express from 'express';
 import { generateVideo } from '../services/jobService.js';
 import { isAuthenticated } from './auth.js';
-import express from "express";
-import prisma from "../prisma"; // your Prisma client instance
+// import prisma from "../prisma"; // your Prisma client instance
+import { PrismaClient } from '@prisma/client'; // ✅ Preferred and cleaner
+const prisma = new PrismaClient();
 const router = express.Router();
 
 router.get('/video', (req,res) => [
@@ -14,18 +15,29 @@ router.post('/generate' ,isAuthenticated, generateVideo);
 
 
 // routes/render.js or similar
-router.post("/complete", async (req, res) => {
-  const { renderId, videoUrl } = req.body;
+router.post('/update-url', async (req, res) => {
+  const { promptId, url } = req.body;
+
+  if (!promptId || !url) {
+    return res.status(400).json({ error: 'Missing promptId or url' });
+  }
 
   try {
-    const updated = await prisma.render.update({
-      where: { id: renderId },
-      data: { s3VideoUrl: videoUrl },
+    const newVideo = await prisma.video.create({
+      data: {
+        url,
+        prompt: {
+          connect: {
+            id: promptId
+          }
+        }
+      }
     });
-    res.status(200).json({ success: true, updated });
+
+    return res.status(200).json({ message: 'Video record created', video: newVideo });
   } catch (err) {
-    console.error("DB update error:", err);
-    res.status(500).json({ success: false, error: err.message });
+    console.error('[ERROR] Failed to create video:', err);
+    return res.status(500).json({ error: 'Failed to create video' });
   }
 });
 
