@@ -50,7 +50,7 @@ app.use(session({
     }
   )
 }));
-
+app.set('trust proxy', 2);
 // Flash messages
 app.use(flash());
 

@@ -27,9 +27,10 @@ export const generateVideo = async (req, res) => {
             }
         });
 
-        const manimCode = await generateManimCode(prompt , req.user.id , createdPrompt.id);
+        const manimCode = await generateManimCode(prompt, req.user.id, createdPrompt.id);
 
-        res.status(201).json({
+        res.json({
+            success: true,
             userId: req.user.id,
             prompt: createdPrompt,
             manimCode
