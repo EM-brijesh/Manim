@@ -1,5 +1,5 @@
 import express from 'express';
-import { generateVideo } from '../services/jobService.js';
+import { createCode, generateVideo } from '../services/jobService.js';
 import { isAuthenticated } from './auth.js';
 // import prisma from "../prisma"; // your Prisma client instance
 import { PrismaClient } from '@prisma/client'; // ✅ Preferred and cleaner
@@ -12,6 +12,8 @@ router.get('/video', (req,res) => [
 
 
 router.post('/generate' ,isAuthenticated, generateVideo);
+
+router.post('/create' , isAuthenticated , createCode);
 
 
 // routes/render.js or similar

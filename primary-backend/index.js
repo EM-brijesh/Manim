@@ -11,12 +11,12 @@ const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 const app = express ();
 
-app.use(cors({
-  origin: 'http://localhost:3000', // Replace with your frontend origin
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+// app.use(cors({
+//   origin: 'http://localhost:3000', // Replace with your frontend origin
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
 
 
 app.use(express.json({ limit: '10mb' }));
@@ -59,14 +59,14 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routes
-app.use('/auth', authRoutes);
+app.use('/api/v1/auth', authRoutes);
 
-app.use('/api/v1', videoRoutes);
+app.use('/api/v1/video', videoRoutes);
 
 app.get('/test', (req,res) => {
     res.json({message: "Hello from the backend!"})
 })
 
-app.listen(5000, () => {
-    console.log("Server is running on port 5000");
+app.listen(8000, () => {
+    console.log("Server is running on port 8000");
 });

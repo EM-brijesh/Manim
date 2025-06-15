@@ -1,6 +1,6 @@
 import { createClient } from 'redis';
 import { v4 as uuidv4 } from 'uuid';
-import { generateManimCode } from './llmService.js';
+import { generateCode, generateManimCode } from './llmService.js';
 import pkg from '@prisma/client';
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -40,6 +40,50 @@ export const generateVideo = async (req, res) => {
         res.status(500).json({ error: 'Something went wrong while generating the video.' });
     }
 };
+
+
+export const createCode = async (req , res) => {
+    const {prompt } = req.body;
+    if (!prompt || typeof prompt !== 'string' || prompt.trim() === '') {
+        return res.status(400).json({ error: 'Invalid prompt' });
+      }
+
+     
+    const trimmedPrompt = prompt.trim();
+    
+    try{
+        //create Project
+        const project = await prisma.project.create({
+            data:{
+                name:trimmedPrompt,
+                description:trimmedPrompt,
+                user: { connect: { id: req.user.id } }
+            }
+
+        })
+        //create first iteration with prompt
+        const iteration = await prisma.iteration.create({
+            data: {
+                prompt:trimmedPrompt,
+                projectId: project.id,
+                status: 'PENDING'
+            }
+        })
+        //call LLM
+        const llmCall = await generateCode(trimmedPrompt , req.user.id , iteration.id);
+        res.json({
+            success: true,
+            projectId: project.id,
+            iterationId: iteration.id,
+            prompt: trimmedPrompt,
+            userId: req.user.id
+          });
+    }catch (err){
+        console.log(err);
+        
+    }
+}
+
 
 
 
